@@ -1,0 +1,303 @@
+<!DOCTYPE html>  
+<html xmlns:th="http://www.thymeleaf.org"  
+xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"  
+layout:decorator="layout/default" style="margin-left: 15px;">  
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+<title>Csv文件管理</title> 
+   
+<!--1. 引入必须的jquery文件  --> <!--maven项目会拦截css。js等文件，所以需要再springmvc里面把对静态资源的handler配置起来  -->
+  <script src="https://code.jquery.com/jquery-3.3.1.js"></script>
+<!-- 2、bootstrap组件引用  -->
+    <script type="text/javascript"   th:src="@{/static/js/bootstrap.js}"></script>
+    <link rel="stylesheet" type="text/css" href="../../../static/css/bootstrap.css" th:href="@{/static/css/bootstrap.css}"/>
+    
+ <!-- 3、bootstrap table组件以及中文包的引用  -->
+   <script type="text/javascript"   th:src="@{/static/js/bootstrap-table.js}"></script>
+   <link rel="stylesheet" type="text/css" href="../../../static/css/bootstrap-table.css" th:href="@{/static/css/bootstrap-table.css}"/>
+    
+   <script type="text/javascript">
+
+		function checkSubmit(){
+			var t_textNode = document.getElementById("t_text");
+			var c_textNode = document.getElementById("c_text");
+			var fileNode = document.getElementById("file");
+			if (fileNode.value == "" || fileNode.value == null ){
+				alert("没有指定上传文件");
+				return false;
+			}
+			return true;
+		}
+		
+		function showtable(){
+			document.getElementById("table_account").style.display="block";
+		}
+		
+/* 		function edit(btu){
+			var primaryKey = btu.value;
+	        $.ajax({
+	            url:"@{/upload}",
+	            type:"post",
+	            data:{"primaryKey": primaryKey},    
+	            dataType:"json",
+	            success:function (data) {
+	                alert(data);
+	            }
+	        })
+		}
+
+		function deleteItem(btu){
+			var primaryKey = btu.value;
+	        $.ajax({
+	            url:"@{/deleteItem}",
+	            type:"post",
+	            data:{"primaryKey": primaryKey},    
+	            dataType:"json",
+	            success:function (data) {
+	                alert(data);
+	            }
+	        })
+		}
+		
+		function download(btu){
+			var tableValue = btu.value;
+			 $.ajax({
+		            url:"@{/downloadTable}",
+		            type:"post",
+		            data:{"tableValue": tableValue},    
+		            dataType:"json",
+		            success:function (data) {
+		                alert(data);
+		            }
+		    })
+		}
+		
+		function deleteTable(btu){
+			var tableValue = btu.value;
+			 $.ajax({
+		            url:"@{/deleteTable}",
+		            type:"post",
+		            data:{"tableValue": tableValue},    
+		            dataType:"json",
+		            success:function (data) {
+		                alert(data);
+		            }
+		    })
+		} */
+		
+   </script>
+</head> 
+ 
+<body style="width:80%">
+<!--使用thymeleaf和bootstrap的时候一定要注意在pom里面引入jar包，不然无效  -->  
+	<div layout:fragment="content">  
+		<h1>CSV文件数据管理系统</h1>  
+			<blockquote>
+				<p class="text-left">
+					文件上传说明：<br>
+					<small>1.必须是csv类型文件。2.文件编码最好是UTF-8，否则会出现中文乱码现象。
+					3.可存入数据库中的表只有三个，上传文件内容必须和数据库中的数据类型、格式一致，详情参照数据示例。<br></small>
+					<small>4.每张表的第一列数据为各表的主键，如果上传文件中的表格数据存在与数据库已存表的主键值相同的情况将覆盖数据库中的原值</small></p>
+			</blockquote>
+		<form class="form-group" th:action="@{/upload}" method="post" enctype="multipart/form-data">  
+			<div>  
+				<label for="file">File input</label>
+				<input type="file" id="file" name="file"/>
+				<p class="help-block">指定需要上传的CSV文件，注意文件格式和文件编码</p>  
+			</div>  
+			<div>  
+				<button class="btn btn-primary" type="submit" name="save" onclick="return checkSubmit()">
+					生成相应表格</button>  
+				<span th:text="${fileMsg}" class="text-warning"></span>	
+			</div>  
+		</form>  
+	</div>  
+	
+	<!-- <select th:field="${tableList}" name="tableSelection" th:remove="all-but-first"> -->
+	<select th:name="tableSelection" th:remove="all-but-first" onchange="showtable()">
+		<option value="">--请选择表格--</option>
+		<!-- <option th:each = "table : ${tableList}" th:value="${table.tableName}" th:text="${table.tableName}"></option> -->
+		<!--  th:selected="${sex=='1'}" 设置条件如果是true则选项被选中 -->
+		<!--    <div>
+                    <label for="sex1" class="control-label">班级:</label>
+                    <select class="form-control" name="cid">
+                        <option>请选择班级</option>
+                        <option th:each="list:${session.list}" th:value="${list.cid}" th:text="${list.cname }"></option>
+                    </select>
+                </div>          -->
+		<option value="userTable">User</option>
+		<option value="itemsTable" th:selected="${sex=='1'}">Items</option>
+		<option value="accountTable" th:selected="${sex=='1'}">Account</option>
+	</select>
+
+	    <div class="panel-body" style="padding-bottom:0px;">
+        <div class="panel panel-default">
+            <div class="panel-heading">查询条件</div>
+            <div class="panel-body">
+                <form id="formSearch" class="form-horizontal">
+                    <div class="form-group" style="margin-top:15px">
+                        <label class="control-label col-sm-1" for="txt_search_departmentname">部门名称</label>
+                        <div class="col-sm-3">
+                            <input type="text" class="form-control" id="txt_search_departmentname">
+                        </div>
+                        <label class="control-label col-sm-1" for="txt_search_statu">状态</label>
+                        <div class="col-sm-3">
+                            <input type="text" class="form-control" id="txt_search_statu">
+                        </div> 
+                        <div class="col-sm-4" style="text-align:left;">
+                            <button type="button" style="margin-left:50px" id="btn_query" class="btn btn-primary">查询</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>       
+    </div>
+
+
+
+
+
+
+
+	
+	<div id="div_table">
+		<span>
+			<button class="btn btn-primary" value="download_u" onclick="download(this)">下载</button>
+			<button class="btn btn-danger" value="deleteTable_u" onclick="delete(this)">清空表格数据</button>
+			<span th:text="${tabelMsg}" class="text text-warning"></span>
+		</span>
+		<div>
+			<table id="table_user" class="table table-bordered table-hover">
+			
+				<tr>
+					<ins>
+						
+					</ins>
+				</tr>
+				<tr>
+					<th class="text-center" colspan="5">用户数据表</th>
+				</tr>
+				
+				<tr>
+					<th class="text-center">uid</th>
+					<th class="text-center">username</th>
+				    <th class="text-center">password</th>	
+					<th class="text-center">email</th>
+					<th class="text-center" >操作</th>
+				</tr>
+				<tr th:each = "user : ${userList}">
+					<td th:text="${user.uid}"></td>
+					<td th:text="${user.username}"></td>
+					<td th:text="${user.password}"></td>
+					<td th:text="${user.email}"></td>
+					<td style="width:136px">
+				        <div id="toolbar" class="btn-group">
+				            <button id="btn_add" type="button" class="btn btn-default">
+				                <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
+				            </button>
+				            <button id="btn_edit" type="button" class="btn btn-default">
+				                <span class="glyphicon glyphicon-pencil" aria-hidden="true"></span>
+				            </button>
+				            <button id="btn_delete" type="button" class="btn btn-default">
+				                <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
+				            </button>
+       					 </div>
+					</td>
+				</tr>
+				<tr>
+					<th class="text-center" colspan="5">
+						<div>
+							<span>整表操作:</span>
+							<button value="download_u" onclick="download(this)">下载</button>
+							<button value="deleteTable_u" onclick="delete(this)">删除</button>
+						</div>
+					</th>
+				</tr>
+			</table>
+		</div>
+		
+		<div>
+			<table id="table_account" class="table table-bordered table-hover"  style="width:80%">
+				
+				<tr>
+					<th class="text-center" colspan="4">账户数据表</th>
+				</tr>
+				<tr>
+					<th class="text-center">account</th>
+					<th class="text-center">password</th>
+				    <th class="text-center">balance</th>	
+				    <th class="text-center">操作</th>
+				</tr>
+				<tr th:each = "account : ${accountList}">
+					<td th:text="${account.account}"></td>
+					<td th:text="${account.password}"></td>
+					<td th:text="${account.balance}"></td>
+					<td style="width:136px">
+				        <div id="toolbar" class="btn-group">
+				            <button id="btn_add" type="button" class="btn btn-default">
+				                <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
+				            </button>
+				            <button id="btn_edit" type="button" class="btn btn-default">
+				                <span class="glyphicon glyphicon-pencil" aria-hidden="true"></span>
+				            </button>
+				            <button id="btn_delete" type="button" class="btn btn-default">
+				                <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
+				            </button>
+       					 </div>
+					</td>
+				<tr>
+					<th class="text-center" colspan="4">
+						<div>
+							<span>整表操作:</span>
+							<button value="download_a" onclick="download(this)">下载</button>
+							<button value="deleteTable_a" onclick="deleteTable(this)">删除</button>
+						</div>
+					</th>
+				</tr>
+			</table>
+		</div>
+		
+		<div>
+			<table id="table_items" class="table table-bordered table-hover" style="width:80%">
+				<tr>
+					<th class="text-center" colspan="4">商品数据表</th>
+				</tr>
+				<tr>
+					<th class="text-center">item</th>
+					<th class="text-center">price</th>
+				    <th class="text-center">info</th>
+				    <th class="text-center" >操作</th>	
+				</tr>
+				<tr th:each = "items : ${itemsList}">
+					<td th:text="${items.item}"></td>
+					<td th:text="${items.price}"></td>
+					<td th:text="${items.info}"></td>
+					<td style="width:136px">
+				        <div id="toolbar" class="btn-group">
+				            <button id="btn_add" type="button" class="btn btn-default">
+				                <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
+				            </button>
+				            <button id="btn_edit" type="button" class="btn btn-default">
+				                <span class="glyphicon glyphicon-pencil" aria-hidden="true"></span>
+				            </button>
+				            <button id="btn_delete" type="button" class="btn btn-default">
+				                <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
+				            </button>
+       					 </div>
+					</td>
+				</tr>
+				<tr>
+					<th class="text-center" colspan="4">
+						<div>
+							<span>整表操作:</span>
+							<button value="download_i" onclick="download(this)">下载</button>
+							<button value="deleteTable_i" onclick="deleteTable(this)">删除</button>
+						</div>
+					</th>
+				</tr>
+			</table>
+		</div>
+		
+	</div>
+</body>  
+
+</html> 

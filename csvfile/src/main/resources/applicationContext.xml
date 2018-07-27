@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>  
+<beans xmlns="http://www.springframework.org/schema/beans"        
+    xmlns:mvc="http://www.springframework.org/schema/mvc"     
+    xmlns:tx="http://www.springframework.org/schema/tx"  
+    xmlns:aop="http://www.springframework.org/schema/aop"  
+    xmlns:context="http://www.springframework.org/schema/context"  
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"              
+    xsi:schemaLocation="                                               
+            http://www.springframework.org/schema/beans    
+            http://www.springframework.org/schema/beans/spring-beans.xsd    
+            http://www.springframework.org/schema/context     
+            http://www.springframework.org/schema/context/spring-context.xsd    
+            http://www.springframework.org/schema/mvc    
+            http://www.springframework.org/schema/mvc/spring-mvc.xsd  
+            http://www.springframework.org/schema/tx   
+            http://www.springframework.org/schema/tx/spring-tx.xsd  
+            http://www.springframework.org/schema/aop  
+            http://www.springframework.org/schema/aop/spring-aop.xsd ">  
+            
+      <!--DBプロパティファイルのパスを指定する-->   
+     <context:property-placeholder location="classpath*:db.properties"/>       
+            
+     <!--JDBC 接続プールの設定-->       
+    <bean id="dataSource" class="com.mchange.v2.c3p0.ComboPooledDataSource">
+		<property name="driverClass" value="${jdbc.driver}"></property>
+		<property name="jdbcUrl" value="${jdbc.url}"></property>
+		<property name="user" value="${jdbc.username}"></property>
+		<property name="password" value="${jdbc.password}"></property>
+	</bean>
+            
+     <!--sqlSessionFactoryの設定  -->       
+	<bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+		<!-- mybatisの設定ファイルを指定する -->
+		<property name="configLocation" value="classpath:sqlMapConfig.xml"></property>
+		<!--データソースの配置  -->
+		<property name="dataSource" ref="dataSource"></property>
+		 <!-- 配置mapper文件位置，扫描映射文件 -->
+   		<property name="mapperLocations" value="classpath*:mapper/*.xml" />
+	</bean>
+	
+	<!-- mybatisマッパースキャンの設定-->
+	<bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+		<property name="basePackage" value="wj.csv.mapper"></property>
+		<property name="sqlSessionFactoryBeanName" value="sqlSessionFactory"></property>
+	</bean>
+	
+    <tx:annotation-driven transaction-manager="transactionManager"/>
+    
+    <!--在这里进行事务控制的配置  定义一个事务管理器，对mybatis操作数据库事务控制，spring使用jdbc的事务控制类-->
+	<bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+		<!-- 既然是对数据库的事务控制就一定要配置数据源，而这个数据源是配在applicationContext-dao配置文件那里的 -->
+		<property name="dataSource" ref="dataSource"/>
+	</bean>
+	
+	<!-- 通知(要想达成自动的事务控制，一定要配置这个，在这里配置的方法都会自动加上事务控制，就有点像环绕通知（加强 aop知识）) （配置完通知，还要配置aop）-->
+	<tx:advice id="txAdvice" transaction-manager="transactionManager">
+		<tx:attributes>
+			<!--传播行为  -->
+			<tx:method name="save*" propagation="REQUIRED"/>
+			<tx:method name="delete*" propagation="REQUIRED"/>
+			<tx:method name="insert*" propagation="REQUIRED"/>
+			<tx:method name="update*" propagation="REQUIRED"/>
+			<tx:method name="write*" propagation="REQUIRED"/>
+			<tx:method name="find*" propagation="SUPPORTS" read-only="true"/>
+			<tx:method name="get*" propagation="SUPPORTS" read-only="true"/>
+			<tx:method name="select*" propagation="SUPPORTS" read-only="true"/>
+			<tx:method name="read*" propagation="SUPPORTS" read-only="true"/>
+			<!-- 单纯的查询方法其实是不需要事务管理的（不需要commit rollback等操作，所以使用supports，只读，有事务操作就用，没有就算） -->
+		</tx:attributes>
+	</tx:advice>
+	
+	<!-- 只有配置了aop上面配置的事务管理才能作用到我们想要进行事务管理的类的方法上 -->
+ 	<aop:config>
+		<!-- 切点设置为service的实现类包下面的所有类的所有方法 -->
+		<aop:advisor advice-ref="txAdvice" pointcut="execution(* wj.csv.service.*.*(..))" />
+	</aop:config> 
+</beans>
