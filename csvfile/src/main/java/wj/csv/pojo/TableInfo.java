@@ -1,7 +1,6 @@
 package wj.csv.pojo;
 
-
-public class TableList {
+public class TableInfo {
 	private String tableName;
 
 	public String getTableName() {
@@ -12,8 +11,4 @@ public class TableList {
 		this.tableName = tableName;
 	}
 
-	@Override
-	public String toString() {
-		return "TableList [tableName=" + tableName + "]";
-	}
 }

@@ -162,7 +162,4 @@
     WHERE
     item= #{primaryKey}
   </delete>
-    <select id="showTables" resultType="wj.csv.pojo.TableList">
-  	  	SELECT table_name FROM information_schema.tables WHERE table_schema='database2' AND table_type='base table';
-  </select>
 </mapper>

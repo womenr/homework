@@ -11,17 +11,19 @@ import javax.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import org.springframework.web.multipart.MultipartFile;
 
 import wj.base.controller.BaseController;
 import wj.csv.pojo.Account;
 import wj.csv.pojo.Items;
 import wj.csv.pojo.Msg;
-import wj.csv.pojo.TableList;
+import wj.csv.pojo.TableInfo;
 import wj.csv.pojo.User;
 import wj.csv.service.CsvFileService;
 
@@ -67,8 +69,8 @@ public class CsvFileController extends BaseController{
 		model.addAttribute("userList", userList);
 		model.addAttribute("itemsList", itemsList);
 		model.addAttribute("accountList", accountList);
-		/*List<TableList> tableList = csvFileService.showTables();
-		model.addAttribute("tableList", tableList);*/
+		List<TableInfo> tableList = csvFileService.getTableNames();
+		model.addAttribute("tableList", tableList);
 		return "files/upload";
 	}
 	
@@ -106,6 +108,9 @@ public class CsvFileController extends BaseController{
 		}
 		//如果上述步骤都通过了，那就说明文件上传成功，并且数据也保存到了数据库，则跳转到成功页面。
     	return "files/success";
-
 	}
+	
+
+	
+	
 }

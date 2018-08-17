@@ -15,11 +15,16 @@ layout:decorator="layout/default" style="margin-left: 15px;">
    <script type="text/javascript"   th:src="@{/static/js/bootstrap-table.js}"></script>
    <link rel="stylesheet" type="text/css" href="../../../static/css/bootstrap-table.css" th:href="@{/static/css/bootstrap-table.css}"/>
     
+  <style type=text/css>
+  	#t_user {display: none}
+  	#t_account {display: none}
+  	#t_items {display: none}
+  	#mainBody {display: none}
+  </style>
+    
    <script type="text/javascript">
 
 		function checkSubmit(){
-			var t_textNode = document.getElementById("t_text");
-			var c_textNode = document.getElementById("c_text");
 			var fileNode = document.getElementById("file");
 			if (fileNode.value == "" || fileNode.value == null ){
 				alert("没有指定上传文件");
@@ -28,8 +33,19 @@ layout:decorator="layout/default" style="margin-left: 15px;">
 			return true;
 		}
 		
-		function showtable(){
-			document.getElementById("table_account").style.display="block";
+		function showtable(tableSelected){ //如果有效选中了一个表格的话，获取所有表格节点，依次循环判断所有表格节点的id是不是被选中的，是的话就显示，不是就隐藏。
+			if (tableSelected != null && tableSelected != ""){
+				document.getElementById("mainBody").style.display = "inline";
+				var tables = document.getElementsByTagName('table');
+				for (var x = 0; x < tables.length; x++){
+					if (tables[x].id == tableSelected){
+						tables[x].style.display = "table";
+					}
+					else {
+						tables[x].style.display = "none";
+					}
+				}
+			}
 		}
 		
 /* 		function edit(btu){
@@ -112,10 +128,10 @@ layout:decorator="layout/default" style="margin-left: 15px;">
 		</form>  
 	</div>  
 	
-	<!-- <select th:field="${tableList}" name="tableSelection" th:remove="all-but-first"> -->
-	<select th:name="tableSelection" th:remove="all-but-first" onchange="showtable()">
+	<select id="talbeSelect" th:field="${tableList}" th:name="tableSelection" onchange="showtable(this.value)"> 
+	<!-- <select th:name="tableSelection" th:remove="all-but-first" onchange="showtable()"> -->
 		<option value="">--请选择表格--</option>
-		<!-- <option th:each = "table : ${tableList}" th:value="${table.tableName}" th:text="${table.tableName}"></option> -->
+		<option th:each = "table : ${tableList}" th:value="${table.tableName}" th:text="${table.tableName}"></option>
 		<!--  th:selected="${sex=='1'}" 设置条件如果是true则选项被选中 -->
 		<!--    <div>
                     <label for="sex1" class="control-label">班级:</label>
@@ -124,9 +140,6 @@ layout:decorator="layout/default" style="margin-left: 15px;">
                         <option th:each="list:${session.list}" th:value="${list.cid}" th:text="${list.cname }"></option>
                     </select>
                 </div>          -->
-		<option value="userTable">User</option>
-		<option value="itemsTable" th:selected="${sex=='1'}">Items</option>
-		<option value="accountTable" th:selected="${sex=='1'}">Account</option>
 	</select>
 
 	    <div class="panel-body" style="padding-bottom:0px;">
@@ -153,150 +166,146 @@ layout:decorator="layout/default" style="margin-left: 15px;">
     </div>
 
 
-
-
-
-
-
 	
-	<div id="div_table">
+	<div id="mainBody">
 		<span>
 			<button class="btn btn-primary" value="download_u" onclick="download(this)">下载</button>
 			<button class="btn btn-danger" value="deleteTable_u" onclick="delete(this)">清空表格数据</button>
 			<span th:text="${tabelMsg}" class="text text-warning"></span>
 		</span>
-		<div>
-			<table id="table_user" class="table table-bordered table-hover">
-			
-				<tr>
-					<ins>
-						
-					</ins>
-				</tr>
-				<tr>
-					<th class="text-center" colspan="5">用户数据表</th>
-				</tr>
+		<div id="div_table">
+			<div>
+				<table id="t_user" class="table table-bordered table-hover">
 				
-				<tr>
-					<th class="text-center">uid</th>
-					<th class="text-center">username</th>
-				    <th class="text-center">password</th>	
-					<th class="text-center">email</th>
-					<th class="text-center" >操作</th>
-				</tr>
-				<tr th:each = "user : ${userList}">
-					<td th:text="${user.uid}"></td>
-					<td th:text="${user.username}"></td>
-					<td th:text="${user.password}"></td>
-					<td th:text="${user.email}"></td>
-					<td style="width:136px">
-				        <div id="toolbar" class="btn-group">
-				            <button id="btn_add" type="button" class="btn btn-default">
-				                <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
-				            </button>
-				            <button id="btn_edit" type="button" class="btn btn-default">
-				                <span class="glyphicon glyphicon-pencil" aria-hidden="true"></span>
-				            </button>
-				            <button id="btn_delete" type="button" class="btn btn-default">
-				                <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
-				            </button>
-       					 </div>
-					</td>
-				</tr>
-				<tr>
-					<th class="text-center" colspan="5">
-						<div>
-							<span>整表操作:</span>
-							<button value="download_u" onclick="download(this)">下载</button>
-							<button value="deleteTable_u" onclick="delete(this)">删除</button>
-						</div>
-					</th>
-				</tr>
-			</table>
-		</div>
+					<tr>
+						<ins>
+							
+						</ins>
+					</tr>
+					<tr>
+						<th class="text-center" colspan="5">用户数据表</th>
+					</tr>
+					
+					<tr>
+						<th class="text-center">uid</th>
+						<th class="text-center">username</th>
+					    <th class="text-center">password</th>	
+						<th class="text-center">email</th>
+						<th class="text-center" >操作</th>
+					</tr>
+					<tr th:each = "user : ${userList}">
+						<td th:text="${user.uid}"></td>
+						<td th:text="${user.username}"></td>
+						<td th:text="${user.password}"></td>
+						<td th:text="${user.email}"></td>
+						<td style="width:136px">
+					        <div id="toolbar" class="btn-group">
+					            <button id="btn_add" type="button" class="btn btn-default">
+					                <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
+					            </button>
+					            <button id="btn_edit" type="button" class="btn btn-default">
+					                <span class="glyphicon glyphicon-pencil" aria-hidden="true"></span>
+					            </button>
+					            <button id="btn_delete" type="button" class="btn btn-default">
+					                <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
+					            </button>
+	       					 </div>
+						</td>
+					</tr>
+					<tr>
+						<th class="text-center" colspan="5">
+							<div>
+								<span>整表操作:</span>
+								<button value="download_u" onclick="download(this)">下载</button>
+								<button value="deleteTable_u" onclick="delete(this)">删除</button>
+							</div>
+						</th>
+					</tr>
+				</table>
+			</div>
 		
-		<div>
-			<table id="table_account" class="table table-bordered table-hover"  style="width:80%">
-				
-				<tr>
-					<th class="text-center" colspan="4">账户数据表</th>
-				</tr>
-				<tr>
-					<th class="text-center">account</th>
-					<th class="text-center">password</th>
-				    <th class="text-center">balance</th>	
-				    <th class="text-center">操作</th>
-				</tr>
-				<tr th:each = "account : ${accountList}">
-					<td th:text="${account.account}"></td>
-					<td th:text="${account.password}"></td>
-					<td th:text="${account.balance}"></td>
-					<td style="width:136px">
-				        <div id="toolbar" class="btn-group">
-				            <button id="btn_add" type="button" class="btn btn-default">
-				                <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
-				            </button>
-				            <button id="btn_edit" type="button" class="btn btn-default">
-				                <span class="glyphicon glyphicon-pencil" aria-hidden="true"></span>
-				            </button>
-				            <button id="btn_delete" type="button" class="btn btn-default">
-				                <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
-				            </button>
-       					 </div>
-					</td>
-				<tr>
-					<th class="text-center" colspan="4">
-						<div>
-							<span>整表操作:</span>
-							<button value="download_a" onclick="download(this)">下载</button>
-							<button value="deleteTable_a" onclick="deleteTable(this)">删除</button>
-						</div>
-					</th>
-				</tr>
-			</table>
-		</div>
+			<div>
+				<table id="t_account" class="table table-bordered table-hover">
+					
+					<tr>
+						<th class="text-center" colspan="4">账户数据表</th>
+					</tr>
+					<tr>
+						<th class="text-center">account</th>
+						<th class="text-center">password</th>
+					    <th class="text-center">balance</th>	
+					    <th class="text-center">操作</th>
+					</tr>
+					<tr th:each = "account : ${accountList}">
+						<td th:text="${account.account}"></td>
+						<td th:text="${account.password}"></td>
+						<td th:text="${account.balance}"></td>
+						<td style="width:136px">
+					        <div id="toolbar" class="btn-group">
+					            <button id="btn_add" type="button" class="btn btn-default">
+					                <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
+					            </button>
+					            <button id="btn_edit" type="button" class="btn btn-default">
+					                <span class="glyphicon glyphicon-pencil" aria-hidden="true"></span>
+					            </button>
+					            <button id="btn_delete" type="button" class="btn btn-default">
+					                <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
+					            </button>
+	       					 </div>
+						</td>
+					<tr>
+						<th class="text-center" colspan="4">
+							<div>
+								<span>整表操作:</span>
+								<button value="download_a" onclick="download(this)">下载</button>
+								<button value="deleteTable_a" onclick="deleteTable(this)">删除</button>
+							</div>
+						</th>
+					</tr>
+				</table>
+			</div>
 		
-		<div>
-			<table id="table_items" class="table table-bordered table-hover" style="width:80%">
-				<tr>
-					<th class="text-center" colspan="4">商品数据表</th>
-				</tr>
-				<tr>
-					<th class="text-center">item</th>
-					<th class="text-center">price</th>
-				    <th class="text-center">info</th>
-				    <th class="text-center" >操作</th>	
-				</tr>
-				<tr th:each = "items : ${itemsList}">
-					<td th:text="${items.item}"></td>
-					<td th:text="${items.price}"></td>
-					<td th:text="${items.info}"></td>
-					<td style="width:136px">
-				        <div id="toolbar" class="btn-group">
-				            <button id="btn_add" type="button" class="btn btn-default">
-				                <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
-				            </button>
-				            <button id="btn_edit" type="button" class="btn btn-default">
-				                <span class="glyphicon glyphicon-pencil" aria-hidden="true"></span>
-				            </button>
-				            <button id="btn_delete" type="button" class="btn btn-default">
-				                <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
-				            </button>
-       					 </div>
-					</td>
-				</tr>
-				<tr>
-					<th class="text-center" colspan="4">
-						<div>
-							<span>整表操作:</span>
-							<button value="download_i" onclick="download(this)">下载</button>
-							<button value="deleteTable_i" onclick="deleteTable(this)">删除</button>
-						</div>
-					</th>
-				</tr>
-			</table>
+			<div>
+				<table id="t_items" class="table table-bordered table-hover">
+					<tr>
+						<th class="text-center" colspan="4">商品数据表</th>
+					</tr>
+					<tr>
+						<th class="text-center">item</th>
+						<th class="text-center">price</th>
+					    <th class="text-center">info</th>
+					    <th class="text-center" >操作</th>	
+					</tr>
+					<tr th:each = "items : ${itemsList}">
+						<td th:text="${items.item}"></td>
+						<td th:text="${items.price}"></td>
+						<td th:text="${items.info}"></td>
+						<td style="width:136px">
+					        <div id="toolbar" class="btn-group">
+					            <button id="btn_add" type="button" class="btn btn-default">
+					                <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
+					            </button>
+					            <button id="btn_edit" type="button" class="btn btn-default">
+					                <span class="glyphicon glyphicon-pencil" aria-hidden="true"></span>
+					            </button>
+					            <button id="btn_delete" type="button" class="btn btn-default">
+					                <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
+					            </button>
+	       					 </div>
+						</td>
+					</tr>
+					<tr>
+						<th class="text-center" colspan="4">
+							<div>
+								<span>整表操作:</span>
+								<button value="download_i" onclick="download(this)">下载</button>
+								<button value="deleteTable_i" onclick="deleteTable(this)">删除</button>
+							</div>
+						</th>
+					</tr>
+				</table>
+			</div>
 		</div>
-		
 	</div>
 </body>  
 

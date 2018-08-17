@@ -13,9 +13,10 @@ import org.springframework.stereotype.Service;
 import wj.csv.mapper.AccountMapper;
 import wj.csv.mapper.ItemsMapper;
 import wj.csv.mapper.UserMapper;
+import wj.csv.mapper.UtilsMapper;
 import wj.csv.pojo.Account;
 import wj.csv.pojo.Items;
-import wj.csv.pojo.TableList;
+import wj.csv.pojo.TableInfo;
 import wj.csv.pojo.User;
 import wj.csv.utils.AutoFillBean;
 
@@ -30,6 +31,9 @@ public class CsvFileService {
 	
 	@Autowired
 	private ItemsMapper itemsMapper;
+	
+	@Autowired
+	private UtilsMapper utilsMapper;
 	
 	public <T> void insertData(InputStream file, String fileName) throws ClassNotFoundException {
 		List<T> beanList = AutoFillBean.fillBean(file, fileName);
@@ -147,16 +151,15 @@ public class CsvFileService {
 		}
 	}
 
-/*	public List<TableList> showTables(){
-		List<String> tables = userMapper.showTables();
-		List<TableList> tableList = new ArrayList<TableList>();
-		for (String tableName : tables) {
-			TableList table = new TableList();
-			table.setTableName(tableName);
-			tableList.add(table);
+	public List<TableInfo> getTableNames(){
+/*		List<TableInfo> tableInfo = utilsMapper.getTableNames();
+		List<String> tableNames = new ArrayList<String>();
+		for (TableInfo tableName : tableInfo) {
+			tableNames.add(tableName.getTableName());
 		}
-		return tableList;
-	}*/
+		return tableNames;*/
+		return utilsMapper.getTableNames();
+	}
 	
 	public void downloadTable() {
 		
