@@ -7,6 +7,7 @@ import java.lang.reflect.Method;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -17,7 +18,7 @@ import wj.pojo.AgentBasicInfo;
 
 public class MyFileHandler {
 	
-	public static void writeCsvByList(String directory, String fileName, List<Object> objectList ) {
+	public static void writeCsvByList(String directory, String fileName, List<AgentBasicInfo> dataList ) {
 		/*
 		 * jdk8的新方法，用来写入文件，读取文件也有更简单的方法，直接用Files.readAllLines等方法
 		 * Get the file reference  
@@ -31,10 +32,19 @@ public class MyFileHandler {
 		 * 
 		 */
 		Path path = Paths.get(directory, fileName);
-		//Files.write(path, dataList);
+		List<String> lines = new ArrayList<String>();
+		for(AgentBasicInfo abi : dataList) {
+			lines.add(abi.toCsvString());
+		}
+		
+		try {
+			Files.write(path, lines, StandardOpenOption.CREATE);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 	
-	public static List<String> beansToString(List<Object> objectList, String objectType, List<String> fields) {
+/*	public static List<String> beansToString(List<Object> objectList, String objectType, List<String> fields) {
 		try {
 			Class<?> clazz = Class.forName(objectType);
 			//获取这个pojo的所有属性
@@ -48,9 +58,9 @@ public class MyFileHandler {
 			e.printStackTrace();
 		}
 		return null;
-	}
+	}*/
 	
-	public static String getMethodName(String field) {
+/*	public static String getMethodName(String field) {
 		StringBuffer sb = new StringBuffer(field);
 		sb.setCharAt(0, Character.toUpperCase(sb.charAt(0)));
 		sb.insert(0, "get");
@@ -64,10 +74,10 @@ public class MyFileHandler {
 			methodNames[i] = methodName;
 		}
 		return methodNames;
-	}
+	}*/
 	
 	//获取一个object的所有指定属性值，并以list形式输出
-	public static Object getValues(Object object, String[] fields){
+/*	public static Object getValues(Object object, String[] fields){
 		String[] values = new String[fields.length];
 		Class<? extends Object> clazz = object.getClass();
 		String[] methodNames = getMethodNames(fields);
@@ -94,7 +104,7 @@ public class MyFileHandler {
 		}
 		
 		return null;
-	}
+	}*/
 	
 	public static void pathFilterAndDelete(String filePath, String regex) { // F:/works  regex = "^agent_\\d+\\.csv"
 		Path path = Paths.get(filePath); 
@@ -127,10 +137,4 @@ public class MyFileHandler {
 		}
 	}
 	
-	public static void main(String[] args) {
-		AgentBasicInfo a = new AgentBasicInfo();
-		String[] fields = {"agentName","agentAge"};
-		Object object = getValues(a, fields);
-		
-	}
 }

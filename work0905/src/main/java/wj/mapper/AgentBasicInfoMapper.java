@@ -3,11 +3,9 @@ package wj.mapper;
 import java.util.List;
 import org.apache.ibatis.annotations.Param;
 import wj.pojo.AgentBasicInfo;
-import wj.pojo.AgentBasicInfoExample;
-import wj.pojo.AgentBasicInfoKey;
 
 public interface AgentBasicInfoMapper {
-    long countByExample(AgentBasicInfoExample example);
+/*    long countByExample(AgentBasicInfoExample example);
 
     int deleteByExample(AgentBasicInfoExample example);
 
@@ -27,7 +25,7 @@ public interface AgentBasicInfoMapper {
 
     int updateByPrimaryKeySelective(AgentBasicInfo record);
 
-    int updateByPrimaryKey(AgentBasicInfo record);
+    int updateByPrimaryKey(AgentBasicInfo record);*/
     
-    List<AgentBasicInfo> orderByAsc(String order);
+    List<AgentBasicInfo> orderByShopNumberAsc(); 
 }
