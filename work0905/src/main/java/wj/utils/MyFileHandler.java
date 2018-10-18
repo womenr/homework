@@ -4,10 +4,13 @@ import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.SimpleFileVisitor;
 import java.nio.file.StandardOpenOption;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -18,7 +21,7 @@ import wj.pojo.AgentBasicInfo;
 
 public class MyFileHandler {
 	
-	public static void writeCsvByList(String directory, String fileName, List<AgentBasicInfo> dataList ) {
+	public static void writeCsvByList(String directory, String fileName, List<String> dataList ) {
 		/*
 		 * jdk8的新方法，用来写入文件，读取文件也有更简单的方法，直接用Files.readAllLines等方法
 		 * Get the file reference  
@@ -32,13 +35,8 @@ public class MyFileHandler {
 		 * 
 		 */
 		Path path = Paths.get(directory, fileName);
-		List<String> lines = new ArrayList<String>();
-		for(AgentBasicInfo abi : dataList) {
-			lines.add(abi.toCsvString());
-		}
-		
 		try {
-			Files.write(path, lines, StandardOpenOption.CREATE);
+			Files.write(path, dataList, StandardOpenOption.CREATE);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -106,7 +104,10 @@ public class MyFileHandler {
 		return null;
 	}*/
 	
-	public static void pathFilterAndDelete(String filePath, String regex) { // F:/works  regex = "^agent_\\d+\\.csv"
+	public static List<Path> pathFilterAndCollect(String filePath, String regex) { 
+		/*
+		 * 用jdk8.0的新方法，直接过滤指定文件夹下面的所有子文件夹，并collect起来一list的形式返回
+		 */
 		Path path = Paths.get(filePath); 
 		Pattern pattern = Pattern.compile(regex); 
 		List<Path> paths;
@@ -122,19 +123,37 @@ public class MyFileHandler {
 				 Matcher matcher = pattern.matcher(file.getName()); 
 				 return matcher.matches(); 
 				}).collect(Collectors.toList());
-			  
-			//将过滤出来的指定文件删除
-			MyFileHandler.deleteFileList(paths);
+			return paths;
+			
 		} catch (IOException e) {
 			e.printStackTrace();
-		} 
+		}
+		return null;
 	}
 	
-	public static void deleteFileList(List<Path> paths) {
-		for (Path path : paths) {
-			File file = path.toFile();
-			file.delete();
+	public static void pathFilterAndDelete(String filePath, String regex) {
+		/* 参考资料：https://blog.csdn.net/qasrc6/article/details/51282185
+		 * 使用Files.walkFileTree的方法遍历指定文件下下面的所有文件，方法参数一个是Path，一个是FileVisitor（接口 相当于文件访问器）
+		 * 这里使用SimpleFileVisitor内部匿名类的方式实现接口
+		 */
+		Path path = Paths.get(filePath); 
+		Pattern pattern = Pattern.compile(regex); 
+		try {
+			Files.walkFileTree(path, new SimpleFileVisitor<Path>() {
+				
+				//访问文件时触发该方法  override该方法  返回FileVisitResult（包含4个访问目录时的操作）
+			        public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+			        	File target = file.toFile();
+			        	Matcher matcher = pattern.matcher(target.getName());  
+			            if (matcher.matches()) {
+			            	target.delete();
+			            	return FileVisitResult.CONTINUE;
+			            }
+			            return FileVisitResult.CONTINUE;
+			        }
+			});
+		} catch (IOException e) {
+			e.printStackTrace();
 		}
 	}
-	
 }
