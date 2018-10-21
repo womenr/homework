@@ -20,6 +20,9 @@ public interface TableInfoMapper {
 	//因为并没有指定查询出的结果存放在哪个实体类，所以这时候的resultType是map
 	List<Map<String, Object>> getDataByTableName(@Param("tableName") String tableName);
 	
-	//获取table的数据类型
+	//获取table的所有数据类型
 	List<String> getDataTypeByTableName(@Param("tableName") String tableName);
+	
+	//通过表名和表头字段名获取该字段的数据类型
+	String getTypeByHeaderAndTable(@Param("tableName") String tableName, @Param("headerName") String headerName);
 }

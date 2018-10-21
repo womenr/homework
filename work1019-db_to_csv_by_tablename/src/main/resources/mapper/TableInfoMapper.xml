@@ -6,14 +6,14 @@
   		其中<foreach>这个标签是用来循环传入的集合的，collection="list"这个参数中有list，map两种，还有就是自定义的参数，
  	 	item="item"这个参数可以自定义，用来循环集合里面的值，这个参数的取名要和下面#（）这个里面的取名一致。 -->
     <select id="getAllHeadersByTableNames" resultType="java.lang.String" parameterType="java.util.List">
-		SELECT a.attname AS name
+	   	SELECT a.attname AS name
 		FROM pg_class AS c,pg_attribute AS a
 		WHERE c.relname in
 		<foreach collection="list" index="index" item="tableName" open="(" separator="," close=")">  
             #{tableName}  
         </foreach>
         AND a.attrelid = c.oid AND a.attnum>0
-  </select>
+    </select>
   
   <!-- 一次仅获取一个table的表头数据 -->
      <select id="getHeaderByTableName" resultType="java.lang.String" parameterType="java.lang.String">
@@ -21,19 +21,29 @@
 		FROM pg_class AS c,pg_attribute AS a
 		WHERE c.relname = #{tableName}
         AND a.attrelid = c.oid AND a.attnum>0
-  </select>
+    </select>
   
     <!-- 获取table里除了表头外的所有数据 -->
      <select id="getDataByTableName" resultType="java.util.Map" parameterType="java.lang.String">
 		SELECT *
 		FROM ${tableName}
-  </select>
+    </select>
   
-    <!-- 获取取一个table的数据类型 -->
+     <!-- 获取一个table的所有数据类型 -->
      <select id="getDataTypeByTableName" resultType="java.lang.String" parameterType="java.lang.String">
 		SELECT t.typname AS typeName
 		FROM pg_class AS c,pg_attribute AS a, pg_type AS t
 		WHERE c.relname = #{tableName}
         AND a.attrelid = c.oid AND a.attnum>0 AND a.atttypid = t.oid
-  </select>
+    </select>
+  
+     <!--通过table的字段名找出这个字段对应的数据类型  -->
+     <select id="getTypeByHeaderAndTable" resultType="java.lang.String" parameterType="java.lang.String">
+		SELECT t.typname AS typeName
+		FROM pg_class AS c,pg_attribute AS a, pg_type AS t
+		WHERE c.relname = #{tableName} 
+		AND a.attname = #{headerName}
+        AND a.attrelid = c.oid AND a.attnum>0 AND a.atttypid = t.oid
+    </select>
+  
 </mapper>
