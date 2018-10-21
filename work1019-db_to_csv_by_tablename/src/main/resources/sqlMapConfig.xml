@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE configuration  
+PUBLIC "-//mybatis.org//DTD Config 3.0//EN"  
+"http://mybatis.org/dtd/mybatis-3-config.dtd">
+<configuration>
+	<!-- 当mapper返回的是map类型的时候（列名为key，value就是具体数据），如果该列数据全为空，则这个key会被省略，下面的设置就是即使为空也显示 -->
+	<settings>
+	    <setting name="callSettersOnNulls" value="true"/>
+	</settings>
+	<!--クラスの別名の設定  -->
+	<typeAliases>
+		<package name="wj.pojo" /> 
+	</typeAliases>
+
+</configuration>  

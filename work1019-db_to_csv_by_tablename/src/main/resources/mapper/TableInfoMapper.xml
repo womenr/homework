@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="wj.mapper.TableInfoMapper">
+  
+  <!--  一次性获取所有指定表的所有表头(参数为list) 
+  		其中<foreach>这个标签是用来循环传入的集合的，collection="list"这个参数中有list，map两种，还有就是自定义的参数，
+ 	 	item="item"这个参数可以自定义，用来循环集合里面的值，这个参数的取名要和下面#（）这个里面的取名一致。 -->
+    <select id="getAllHeadersByTableNames" resultType="java.lang.String" parameterType="java.util.List">
+		SELECT a.attname AS name
+		FROM pg_class AS c,pg_attribute AS a
+		WHERE c.relname in
+		<foreach collection="list" index="index" item="tableName" open="(" separator="," close=")">  
+            #{tableName}  
+        </foreach>
+        AND a.attrelid = c.oid AND a.attnum>0
+  </select>
+  
+  <!-- 一次仅获取一个table的表头数据 -->
+     <select id="getHeaderByTableName" resultType="java.lang.String" parameterType="java.lang.String">
+		SELECT a.attname AS name
+		FROM pg_class AS c,pg_attribute AS a
+		WHERE c.relname = #{tableName}
+        AND a.attrelid = c.oid AND a.attnum>0
+  </select>
+  
+    <!-- 获取table里除了表头外的所有数据 -->
+     <select id="getDataByTableName" resultType="java.util.Map" parameterType="java.lang.String">
+		SELECT *
+		FROM ${tableName}
+  </select>
+  
+    <!-- 获取取一个table的数据类型 -->
+     <select id="getDataTypeByTableName" resultType="java.lang.String" parameterType="java.lang.String">
+		SELECT t.typname AS typeName
+		FROM pg_class AS c,pg_attribute AS a, pg_type AS t
+		WHERE c.relname = #{tableName}
+        AND a.attrelid = c.oid AND a.attnum>0 AND a.atttypid = t.oid
+  </select>
+</mapper>
